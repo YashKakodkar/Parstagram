@@ -8,19 +8,32 @@
 
 import UIKit
 import Parse
+import MessageInputBar
 
-class FeedViewController: UIViewController,UITableViewDelegate, UITableViewDataSource {
+class FeedViewController: UIViewController,UITableViewDelegate, UITableViewDataSource, MessageInputBarDelegate, PostCellDelegate {
     
     @IBOutlet weak var feedTable: UITableView!
     
     var refreshControl: UIRefreshControl!
     var posts = [PFObject]()
+    var selectedPost: PFObject!
     var numberOfPosts: Int!
+    let commentBar = MessageInputBar()
+    var showsCommentBar = false
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         feedTable.delegate = self
         feedTable.dataSource = self
+        feedTable.keyboardDismissMode = .interactive
+        
+        commentBar.inputTextView.placeholder = "Add a comment..."
+        commentBar.sendButton.title = "Post"
+        commentBar.delegate = self
+
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(keyboardWillBeHidden(note:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         // Do any additional setup after loading the view.
         
         refreshControl = UIRefreshControl()
@@ -33,7 +46,7 @@ class FeedViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         super.viewDidAppear(animated)
         numberOfPosts = 20
         let query = PFQuery(className:"Posts")
-        query.includeKey("author")
+        query.includeKeys(["author", "comments", "comments.author"])
         query.limit = numberOfPosts
         query.findObjectsInBackground{(posts,error) in
             if(posts != nil){
@@ -44,6 +57,45 @@ class FeedViewController: UIViewController,UITableViewDelegate, UITableViewDataS
             }
         }
         
+    }
+    
+    @objc func keyboardWillBeHidden(note: Notification){
+        commentBar.inputTextView.text = nil
+        showsCommentBar = false
+        becomeFirstResponder()
+    }
+
+    override var inputAccessoryView: UIView?{
+        return commentBar
+    }
+
+    override var canBecomeFirstResponder: Bool{
+        return showsCommentBar;
+    }
+
+    func messageInputBar(_ inputBar: MessageInputBar, didPressSendButtonWith text: String) {
+
+        let comment = PFObject(className: "Comments")
+
+        comment["text"] = text
+        comment["post"] = selectedPost
+        comment["author"] = PFUser.current()!
+
+        selectedPost.add(comment, forKey: "comments")
+        selectedPost.saveInBackground{ (success,error) in
+            if(success){
+                print("Comment saved")
+            }else{
+                print("Error saving comment")
+            }
+        }
+
+        feedTable.reloadData()
+
+        commentBar.inputTextView.text = nil
+        showsCommentBar = false
+        becomeFirstResponder()
+        commentBar.inputTextView.resignFirstResponder()
     }
     
     @IBAction func onLogoutButton(_ sender: Any) {
@@ -70,77 +122,123 @@ class FeedViewController: UIViewController,UITableViewDelegate, UITableViewDataS
         }
     }
     
-    func loadMorePosts(){
-        if(self.posts.count>=numberOfPosts){
-            numberOfPosts+=20
-            let query = PFQuery(className:"Posts")
-            query.includeKey("author")
-            query.limit = numberOfPosts
-            query.findObjectsInBackground{(posts,error) in
-                if(posts != nil){
-                    self.posts  = posts!
-                    self.feedTable.reloadData()
-                }else {
-                    print("Error: \(String(describing: error))")
-                }
-            }
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath){
-        if(indexPath.row+1 == posts.count){
-            loadMorePosts()
-        }
-    }
+//    func loadMorePosts(){
+//        if(self.posts.count>=numberOfPosts){
+//            numberOfPosts+=20
+//            let query = PFQuery(className:"Posts")
+//            query.includeKeys(["author","comments", "comments.author"])
+//            query.limit = numberOfPosts
+//            query.findObjectsInBackground{(posts,error) in
+//                if(posts != nil){
+//                    self.posts  = posts!
+//                    self.feedTable.reloadData()
+//                }else {
+//                    print("Error: \(String(describing: error))")
+//                }
+//            }
+//        }
+//    }
+//
+//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath){
+//        if(indexPath.row+1 == posts.count){
+//            loadMorePosts()
+//        }
+//    }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let post = posts[section]
+        let comments = (post["comments"] as? [PFObject]) ?? []
+        // put in () ?? [] becuase it is an optional vlaue, can be nil
+        
+        return comments.count + 2
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
         return posts.count
     }
     
+
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = feedTable.dequeueReusableCell(withIdentifier: "PostCell") as! PostCell
-        let post = posts[indexPath.row]
+        let post = posts[indexPath.section]
+        let comments = (post["comments"] as? [PFObject]) ?? []
         
-        let user = post["author"] as! PFUser
-        cell.usernameLabel.text = user.username
-        cell.profileNameLabel.text = user.username
-        cell.captionLabel.text = post["caption"] as? String
+        if (indexPath.row == 0){
+            
+            let cell = feedTable.dequeueReusableCell(withIdentifier: "PostCell") as! PostCell
+            cell.delegate = self
+            cell.setPost(post: post, comments: comments)
+            
+            return cell
         
-        let imageFile = post["image"] as! PFFileObject
-        let urlString = imageFile.url!
-        let url = URL(string: urlString)!
+        } else if indexPath.row <= comments.count {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "CommentCell") as! CommentCell
+            
+            let comment = comments[indexPath.row - 1]
+            cell.commentLabel.text = comment["text"] as? String
+            let user = comment["author"] as! PFUser
+            cell.usernameLabel.text = user.username
+            
+            let profileImageFile = user["ProfileImage"] as! PFFileObject
+            let profileUrlString = profileImageFile.url!
+            let profileUrl = URL(string: profileUrlString)!
+            cell.profileImageView.af_setImage(withURL: profileUrl)
+            
+            return cell
+        }else{
+            let cell = tableView.dequeueReusableCell(withIdentifier: "AddCommentCell")!
+            return cell
+        }
         
-        cell.photoView.af_setImage(withURL: url)
         
-        return cell
         
     }
     
+    func callSegueFromCell(myData dataobject: AnyObject) {
+        //try not to send self, just to avoid retain cycles(depends on how you handle the code on the next controller)
+        //self.performSegue(withIdentifier: "feedToComments", sender:dataobject )
+        
+    }
+
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let post = posts[indexPath.row]
-        let comment  = PFObject(className: "Comments")
-        comment["text"] = "This is a dummy comment"
-        comment["post"] = post
-        comment["author"] = PFUser.current()!
-        
-        post.add(comment, forKey: "comments")
-        post.saveInBackground{ (success,error) in
-            if(success){
-                print("Comment saved")
-            }else{
-                print("Error saving comment")
-            }
+        let comments  = (post["comments"] as? [PFObject]) ?? []
+
+        if(indexPath.row == comments.count+1){
+            showsCommentBar = true
+            becomeFirstResponder()
+            commentBar.inputTextView.becomeFirstResponder()
+
+            selectedPost = post
         }
+
+
     }
 
-    /*
+    
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+//        print("loading data")
+//
+//        if(segue.identifier == "feedToComments"){
+//        // Find the selected movie
+//        let vc =  segue.destination as! CommentViewController
+//        let cell = sender as! UITableViewCell
+//        let indexPath = tableView.indexPath(for: cell)!
+//        let movie = movies[indexPath.row]
+//
+//        detailsViewController.movie = movie
+//
+//        tableView.deselectRow(at: indexPath, animated: true)
+//        }
+//        // Get the new view controller using segue.destination.
+//        // Pass the selected object to the new view controller.
+    
+
+    
     }
-    */
+    
 
 }

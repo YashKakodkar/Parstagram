@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		55EBA224BF499032147338D3 /* Pods_Parstagram.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8A09975814191641F88A69A /* Pods_Parstagram.framework */; };
+		9815DD892245514100D9081D /* SignupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9815DD882245514100D9081D /* SignupViewController.swift */; };
+		9815DD8B22456D4100D9081D /* CommentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9815DD8A22456D4100D9081D /* CommentViewController.swift */; };
+		9815DD8F22488BCF00D9081D /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9815DD8E22488BCF00D9081D /* ProfileViewController.swift */; };
+		9815DD912248A5DD00D9081D /* EditProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9815DD902248A5DD00D9081D /* EditProfileViewController.swift */; };
+		9861E195223DC76700528310 /* CommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9861E194223DC76700528310 /* CommentCell.swift */; };
 		98827188222DEFA900E036C1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98827187222DEFA900E036C1 /* AppDelegate.swift */; };
 		9882718D222DEFA900E036C1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9882718B222DEFA900E036C1 /* Main.storyboard */; };
 		9882718F222DEFAB00E036C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9882718E222DEFAB00E036C1 /* Assets.xcassets */; };
@@ -19,6 +24,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9815DD882245514100D9081D /* SignupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupViewController.swift; sourceTree = "<group>"; };
+		9815DD8A22456D4100D9081D /* CommentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentViewController.swift; sourceTree = "<group>"; };
+		9815DD8E22488BCF00D9081D /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		9815DD902248A5DD00D9081D /* EditProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileViewController.swift; sourceTree = "<group>"; };
+		9861E194223DC76700528310 /* CommentCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentCell.swift; sourceTree = "<group>"; };
 		98827184222DEFA900E036C1 /* Parstagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Parstagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98827187222DEFA900E036C1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9882718C222DEFA900E036C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -72,8 +82,13 @@
 				98827187222DEFA900E036C1 /* AppDelegate.swift */,
 				98DC70E32238DE8000D5A77B /* CameraViewController.swift */,
 				9882718B222DEFA900E036C1 /* Main.storyboard */,
+				9815DD902248A5DD00D9081D /* EditProfileViewController.swift */,
+				9815DD8E22488BCF00D9081D /* ProfileViewController.swift */,
+				9815DD8A22456D4100D9081D /* CommentViewController.swift */,
+				9861E194223DC76700528310 /* CommentCell.swift */,
 				98B80BD02239A9730027BF9E /* PostCell.swift */,
 				988271992238C61E00E036C1 /* LoginViewController.swift */,
+				9815DD882245514100D9081D /* SignupViewController.swift */,
 				9882719B2238C62500E036C1 /* FeedViewController.swift */,
 				9882718E222DEFAB00E036C1 /* Assets.xcassets */,
 				98827190222DEFAB00E036C1 /* LaunchScreen.storyboard */,
@@ -185,6 +200,7 @@
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/AlamofireImage/AlamofireImage.framework",
 				"${BUILT_PRODUCTS_DIR}/Bolts/Bolts.framework",
+				"${BUILT_PRODUCTS_DIR}/MessageInputBar/MessageInputBar.framework",
 				"${BUILT_PRODUCTS_DIR}/Parse/Parse.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -194,6 +210,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AlamofireImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Bolts.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MessageInputBar.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Parse.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -230,11 +247,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9815DD8B22456D4100D9081D /* CommentViewController.swift in Sources */,
 				9882719A2238C61E00E036C1 /* LoginViewController.swift in Sources */,
+				9815DD892245514100D9081D /* SignupViewController.swift in Sources */,
 				98DC70E42238DE8000D5A77B /* CameraViewController.swift in Sources */,
 				9882719C2238C62500E036C1 /* FeedViewController.swift in Sources */,
 				98827188222DEFA900E036C1 /* AppDelegate.swift in Sources */,
+				9815DD8F22488BCF00D9081D /* ProfileViewController.swift in Sources */,
 				98B80BD12239A9730027BF9E /* PostCell.swift in Sources */,
+				9815DD912248A5DD00D9081D /* EditProfileViewController.swift in Sources */,
+				9861E195223DC76700528310 /* CommentCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
